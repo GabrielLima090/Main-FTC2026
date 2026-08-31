@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 public class Main extends OpMode {
     private DcMotor motorIntake;
 
-    static final int MAXIMO = 4270;
+    static final int MAXIMO = 4250;
     static final double POWER = 1;
 
     private DcMotor motorViper;
@@ -27,8 +27,9 @@ public class Main extends OpMode {
         motorIntake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         motorViper = hardwareMap.get(DcMotor.class, "viper");
-        motorViper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorViper.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorViper.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorViper.setTargetPosition(0);
+        motorViper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         frontLeftMotor = hardwareMap.dcMotor.get("lf");
         backLeftMotor = hardwareMap.dcMotor.get("lr");
@@ -65,24 +66,21 @@ public class Main extends OpMode {
             motorIntake.setPower(0.0);  // 0.0 = parado
         }
 
-        if(gamepad1.dpad_down) {
+        if (gamepad1.left_bumper) {
+            motorViper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorViper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            motorViper.setPower(0);
+        }
+
+        if(gamepad1.dpad_up) {
             motorViper.setTargetPosition(MAXIMO);
-            motorViper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             motorViper.setPower(POWER);
         }
 
-        if (gamepad1.b) {
+        if (gamepad1.dpad_down) {
             motorViper.setTargetPosition(0);
-            motorViper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             motorViper.setPower(POWER);
         }
-
-        while (motorViper.isBusy()) {
-            // Espera...
-        }
-
-        motorViper.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorViper.setPower(0);
 
         double y = gamepad1.left_stick_y; // Remember, Y stick value is reversed
         double x = -gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing

@@ -31,8 +31,8 @@ public class Main extends OpMode {
         motorViper.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         frontLeftMotor = hardwareMap.dcMotor.get("lf");
-        backLeftMotor = hardwareMap.dcMotor.get("rl");
-        frontRightMotor = hardwareMap.dcMotor.get("fr");
+        backLeftMotor = hardwareMap.dcMotor.get("lr");
+        frontRightMotor = hardwareMap.dcMotor.get("rf");
         backRightMotor = hardwareMap.dcMotor.get("rr");
 
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);

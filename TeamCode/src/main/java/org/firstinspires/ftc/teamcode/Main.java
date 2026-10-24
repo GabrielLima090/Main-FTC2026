@@ -5,14 +5,20 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.opencv.core.Mat;
+
 @TeleOp(name = "main")
 public class Main extends OpMode {
     private DcMotor motorIntake;
 
-    static final int MAXIMO = 4250;
-    static final double POWER = 1;
+    private DcMotor motorShooter;
+    private double PotenciaShooter = 0.5;
+    private boolean subiu = false, desceu = false;
 
-    private DcMotor motorViper;
+
+    //static final int MAXIMO = 4250;
+    //static final double POWER = 1;
+    // private DcMotor motorViper;
 
     DcMotor frontLeftMotor;
     DcMotor backLeftMotor;
@@ -26,10 +32,13 @@ public class Main extends OpMode {
         motorIntake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorIntake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        motorViper = hardwareMap.get(DcMotor.class, "viper");
-        motorViper.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorViper.setTargetPosition(0);
-        motorViper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //motorViper = hardwareMap.get(DcMotor.class, "viper");
+        //motorViper.setDirection(DcMotorSimple.Direction.REVERSE);
+        //motorViper.setTargetPosition(0);
+        //motorViper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        motorShooter = hardwareMap.get(DcMotor.class,"motorShooter");
+        motorShooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         frontLeftMotor = hardwareMap.dcMotor.get("lf");
         backLeftMotor = hardwareMap.dcMotor.get("lr");
@@ -66,21 +75,47 @@ public class Main extends OpMode {
             motorIntake.setPower(0.0);  // 0.0 = parado
         }
 
-        if (gamepad1.left_bumper) {
-            motorViper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            motorViper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            motorViper.setPower(0);
+        // ======= SHOOTER ======
+
+        if (gamepad1.dpad_right && !subiu) {
+            PotenciaShooter += 0.01;
         }
 
-        if(gamepad1.dpad_up) {
-            motorViper.setTargetPosition(MAXIMO);
-            motorViper.setPower(POWER);
+        if (gamepad1.dpad_left && !desceu) {
+            PotenciaShooter -= 0.01;
         }
 
-        if (gamepad1.dpad_down) {
-            motorViper.setTargetPosition(0);
-            motorViper.setPower(POWER);
+        subiu = gamepad1.dpad_right;
+        desceu = gamepad1.dpad_left;
+
+        PotenciaShooter = Math.max(0, Math.min(1, PotenciaShooter));
+
+        if (gamepad1.right_bumper) {
+            motorShooter.setPower(PotenciaShooter);
+        } else {
+            motorShooter.setPower(0);
         }
+
+        telemetry.addData("Potência configurada", "%.2f", PotenciaShooter);
+        telemetry.addData("Potência real", "%.2f", motorShooter.getPower());
+        telemetry.update();
+
+
+        //if (gamepad1.left_bumper) {
+           // motorViper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            //motorViper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            //motorViper.setPower(0);
+        //}
+
+        //if(gamepad1.dpad_up) {
+            //motorViper.setTargetPosition(MAXIMO);
+            //motorViper.setPower(POWER);
+        //}
+
+        //if (gamepad1.dpad_down) {
+           //motorViper.setTargetPosition(0);
+            //motorViper.setPower(POWER);
+       // }
 
         double y = gamepad1.left_stick_y; // Remember, Y stick value is reversed
         double x = -gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
